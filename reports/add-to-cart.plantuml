@@ -1,0 +1,275 @@
+@startuml
+
+title __RETAIL-STORE-APP's Class Diagram__\n
+
+  package org.ak.billing {
+    package org.ak.billing.constants {
+      enum ApplicationConstants {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.strategies {
+      interface CartLoadingStrategy {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.exceptions {
+      class InventoryShortageException {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.beans {
+      class Invoice {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.constants {
+      enum InvoiceDiscounts {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.services {
+      interface InvoiceService {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.strategies {
+      interface InvoicingStrategy {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.strategies {
+      package org.ak.billing.strategies.impls {
+        class MyCartLoadingStrategy {
+        }
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.services {
+      package org.ak.billing.services.impls {
+        class MyCartService {
+        }
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.strategies {
+      package org.ak.billing.strategies.impls {
+        class MyInvoiceGenerator {
+        }
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.services {
+      package org.ak.billing.services.impls {
+        class MyInvoiceService {
+        }
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.strategies {
+      package org.ak.billing.strategies.impls {
+        class MySecondInvoiceGenerator {
+        }
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.services {
+      package org.ak.billing.services.impls {
+        class MyStoreDBService {
+        }
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.daos {
+      package org.ak.billing.daos.impls {
+        class MyStoreDao {
+        }
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.beans {
+      class Product {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.constants {
+      enum ProductTypes {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.beans {
+      class Products {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.beans {
+      class Shopper {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    class ShoppingApplication {
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.beans {
+      class ShoppingCart {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.services {
+      interface ShoppingCartService {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.strategies {
+      package org.ak.billing.strategies.impls {
+        class Store {
+        }
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.services {
+      interface StoreDBService {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.strategies {
+      interface StoreDBStrategy {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.daos {
+      interface StoreDao {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.beans {
+      class UserDetails {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.constants {
+      enum UserTypes {
+      }
+    }
+  }
+  
+
+  package org.ak.billing {
+    package org.ak.billing.helpers {
+      class Utility {
+      }
+    }
+  }
+  
+
+  MyCartLoadingStrategy -up-|> CartLoadingStrategy
+  MyCartService -up-|> ShoppingCartService
+  MyCartService o-- StoreDBService : myStoreDBService
+  MyCartService o-- CartLoadingStrategy : myCartLoadingStrategy
+  MyInvoiceGenerator -up-|> InvoicingStrategy
+  MyInvoiceService -up-|> InvoiceService
+  MyInvoiceService o-- InvoicingStrategy : invoicingStrategy
+  MySecondInvoiceGenerator -up-|> InvoicingStrategy
+  MyStoreDBService -up-|> StoreDBService
+  MyStoreDBService o-- StoreDao : storeDao
+  MyStoreDao -up-|> StoreDao
+  MyStoreDao o-- StoreDBStrategy : myStore
+  Product -up-|> Cloneable
+  Product o-- ProductTypes : type
+  Shopper o-- UserDetails : userDetails
+  Shopper o-- ShoppingCart : shoppingCart
+  Shopper o-- Invoice : invoice
+  ShoppingApplication o-- StoreDBService : myStoreDBService
+  ShoppingApplication o-- MyCartService : myCartService
+  ShoppingApplication o-- InvoiceService : myInvoiceService
+  ShoppingCart o-- Products : productsInCart
+  Store -up-|> StoreDBStrategy
+  UserDetails o-- UserTypes : userType
+
+
+right footer
+
+
+PlantUML diagram generated by SketchIt! (https://bitbucket.org/pmesmeur/sketch.it)
+For more information about this tool, please contact philippe.mesmeur@gmail.com
+endfooter
+
+@enduml
