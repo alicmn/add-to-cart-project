@@ -65,13 +65,12 @@ public class Main {
                     System.out.println("Gecersiz secim, varsayilan olarak Yeni Musteri atandı.");
             }
 
-            UserDetails userDetails = new UserDetails(
-                    "Musteri_ID_001",
-                    type,
-                    userSince,
-                    "+90-555-555-55",
-                    "test@example.com");
-
+            UserDetails userDetails = new UserDetails.Builder()
+                    .uid("Musteri_ID_001")
+                    .userType(type)
+                    .userSince(userSince)
+                    .contacts("+90-555-555-55", "test@example.com")
+                    .build();
             ShoppingCart cart = myCartService.getNewShoppingCart();
             Shopper shopper = new Shopper(userDetails, cart);
 

@@ -15,12 +15,49 @@ public final class UserDetails {
     private final UserTypes userType;
     private final LocalDateTime userSince;
 
-    public UserDetails(String name, UserTypes userType, LocalDateTime userSince, String... contacts) {
-        this.uid = UUID.randomUUID().toString();
-        this.name = name;
-        this.contacts = Arrays.asList(contacts);
-        this.userType = userType;
-        this.userSince = userSince;
+    private UserDetails(Builder builder) {
+        this.uid = builder.uid != null ? builder.uid : UUID.randomUUID().toString();
+        this.name = builder.name;
+        this.contacts = builder.contacts;
+        this.userType = builder.userType;
+        this.userSince = builder.userSince;
+    }
+
+    public static class Builder {
+        private String uid;
+        private String name;
+        private List<String> contacts;
+        private UserTypes userType;
+        private LocalDateTime userSince;
+
+        public Builder uid(String uid) {
+            this.uid = uid;
+            return this;
+        }
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder contacts(String... contacts) {
+            this.contacts = Arrays.asList(contacts);
+            return this;
+        }
+
+        public Builder userType(UserTypes userType) {
+            this.userType = userType;
+            return this;
+        }
+
+        public Builder userSince(LocalDateTime userSince) {
+            this.userSince = userSince;
+            return this;
+        }
+
+        public UserDetails build() {
+            return new UserDetails(this);
+        }
     }
 
     public UserTypes getUserType() {

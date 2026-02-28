@@ -11,17 +11,19 @@ public enum ApplicationConstants {
     BILL_PRODUCT_HEADER(" PRODUCTS PURCHASED "),
     BILL_LENGTH(122),
     BILL_PADDING("*"),
-    BILL_SPACE(" ");
+    BILL_SPACE(" "),
+    EXTRA_DISCOUNT_THRESHOLD(200.0),
+    EXTRA_DISCOUNT_AMOUNT(5.0);
 
     private final Object appCons;
 
     public static final DecimalFormat df = new DecimalFormat("#.##");
 
-    ApplicationConstants(Object appCons){
+    ApplicationConstants(Object appCons) {
         this.appCons = appCons;
     }
 
-    public final Object getApplicationConstant(){
+    public final Object getApplicationConstant() {
         return appCons;
     }
 }

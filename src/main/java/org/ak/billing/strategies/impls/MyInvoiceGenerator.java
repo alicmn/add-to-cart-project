@@ -4,6 +4,7 @@ import org.ak.billing.beans.Invoice;
 import org.ak.billing.beans.Product;
 import org.ak.billing.beans.Shopper;
 import org.ak.billing.beans.UserDetails;
+import org.ak.billing.constants.ApplicationConstants;
 import org.ak.billing.constants.InvoiceDiscounts;
 import org.ak.billing.constants.ProductTypes;
 import org.ak.billing.constants.UserTypes;
@@ -38,9 +39,12 @@ public class MyInvoiceGenerator implements InvoicingStrategy {
 
         double totalBill = totalBillPhone + totalBillNonPhone;
 
-        // Apply $5 discount for every $200 on the bill
-        int extraDiscountSets = (int) (totalBill / 200.0);
-        double extraDiscount = extraDiscountSets * 5.0;
+        // Apply extra discount for every threshold amount on the bill
+        double threshold = (double) ApplicationConstants.EXTRA_DISCOUNT_THRESHOLD.getApplicationConstant();
+        double extraDiscountAmount = (double) ApplicationConstants.EXTRA_DISCOUNT_AMOUNT.getApplicationConstant();
+
+        int extraDiscountSets = (int) (totalBill / threshold);
+        double extraDiscount = extraDiscountSets * extraDiscountAmount;
 
         totalDiscountApplied += extraDiscount;
         totalBill -= extraDiscount;
