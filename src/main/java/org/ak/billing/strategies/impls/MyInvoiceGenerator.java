@@ -19,15 +19,31 @@ public class MyInvoiceGenerator implements InvoicingStrategy {
         UserDetails userDetails = shopper.getUserDetails();
         double userDiscountPercentage = getUserDiscount(userDetails.getUserType(), userDetails.getUserSince());
         double totalDiscountApplied = 0.0d;
-        double totalBill = 0.0d;
+        double totalBillPhone = 0.0d;
+        double totalBillNonPhone = 0.0d;
 
         for (Product p : shopper.getShoppingCart().getProductsInCart().getProducts().values()) {
-            totalBill += getDiscountedProductPrice(p);
+            double discountedPrice = getDiscountedProductPrice(p);
+            if (p.getType().equals(ProductTypes.PHONE)) {
+                totalBillPhone += discountedPrice;
+            } else {
+                totalBillNonPhone += discountedPrice;
+            }
             totalDiscountApplied += getDiscountOnProductPrice(p);
         }
 
-        totalDiscountApplied += totalBill * userDiscountPercentage;
-        totalBill *= (1 - userDiscountPercentage);
+        double userDiscountAmount = totalBillNonPhone * userDiscountPercentage;
+        totalDiscountApplied += userDiscountAmount;
+        totalBillNonPhone -= userDiscountAmount;
+
+        double totalBill = totalBillPhone + totalBillNonPhone;
+
+        // Apply $5 discount for every $200 on the bill
+        int extraDiscountSets = (int) (totalBill / 200.0);
+        double extraDiscount = extraDiscountSets * 5.0;
+
+        totalDiscountApplied += extraDiscount;
+        totalBill -= extraDiscount;
 
         shopper.setInvoice(new Invoice(UUID.randomUUID(), LocalDateTime.now(), totalBill, totalDiscountApplied));
     }
@@ -57,7 +73,7 @@ public class MyInvoiceGenerator implements InvoicingStrategy {
                 break;
             case SILVER_CART:
                 userDiscountPercentage = InvoiceDiscounts.SILVER_CART.getDiscount();
-                break;                
+                break;
         }
         return userDiscountPercentage;
     }
