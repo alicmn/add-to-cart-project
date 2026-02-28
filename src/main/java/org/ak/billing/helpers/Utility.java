@@ -77,7 +77,6 @@ public class Utility {
         }
 
         public static void printProducts(Collection<Product> products) {
-                BigDecimal total = BigDecimal.ZERO;
                 String productHeader = StringUtils.rightPad(" PRODUCT NAME ", 30, " ") +
                                 StringUtils.rightPad("PRODUCT ID", 40, " ") +
                                 StringUtils.rightPad("PRODUCT TYPE", 18, " ") +
@@ -87,7 +86,7 @@ public class Utility {
                 printBuffer();
                 Utility.println(productHeader);
                 printBuffer();
-                for (Product p : products) {
+                products.stream().forEach(p -> {
                         BigDecimal quantity = new BigDecimal(p.getQuantity());
                         BigDecimal itemTotal = p.getUnitPrice().multiply(quantity);
                         String product = StringUtils.rightPad("* " + p.getName(), 30, " ") +
@@ -96,9 +95,12 @@ public class Utility {
                                         StringUtils.rightPad("$" + p.getUnitPrice(), 12, " ") +
                                         StringUtils.rightPad(String.valueOf(p.getQuantity()), 10, " ") +
                                         StringUtils.rightPad("$" + itemTotal, 12, " ");
-                        total = total.add(itemTotal);
                         Utility.println(product);
-                }
+                });
+
+                BigDecimal total = products.stream()
+                                .map(p -> p.getUnitPrice().multiply(new BigDecimal(p.getQuantity())))
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
                 printBuffer();
                 printCenter("Undiscounted Bill = $" + ApplicationConstants.df.format(total),
                                 ApplicationConstants.BILL_SPACE.getApplicationConstant().toString());

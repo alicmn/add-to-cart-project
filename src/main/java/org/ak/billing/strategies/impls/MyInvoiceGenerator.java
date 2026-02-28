@@ -24,19 +24,19 @@ public class MyInvoiceGenerator implements InvoicingStrategy {
         UserDiscountStrategy discountStrategy = UserDiscountFactory.getStrategy(userDetails.getUserType());
         BigDecimal userDiscountPercentage = discountStrategy.calculateDiscount(userDetails.getUserSince());
 
-        BigDecimal totalDiscountApplied = BigDecimal.ZERO;
-        BigDecimal totalBillPhone = BigDecimal.ZERO;
-        BigDecimal totalBillNonPhone = BigDecimal.ZERO;
+        BigDecimal totalBillPhone = shopper.getShoppingCart().getProductsInCart().getProducts().values().stream()
+                .filter(p -> p.getType().equals(ProductTypes.PHONE))
+                .map(this::getDiscountedProductPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        for (Product p : shopper.getShoppingCart().getProductsInCart().getProducts().values()) {
-            BigDecimal discountedPrice = getDiscountedProductPrice(p);
-            if (p.getType().equals(ProductTypes.PHONE)) {
-                totalBillPhone = totalBillPhone.add(discountedPrice);
-            } else {
-                totalBillNonPhone = totalBillNonPhone.add(discountedPrice);
-            }
-            totalDiscountApplied = totalDiscountApplied.add(getDiscountOnProductPrice(p));
-        }
+        BigDecimal totalBillNonPhone = shopper.getShoppingCart().getProductsInCart().getProducts().values().stream()
+                .filter(p -> !p.getType().equals(ProductTypes.PHONE))
+                .map(this::getDiscountedProductPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalDiscountApplied = shopper.getShoppingCart().getProductsInCart().getProducts().values().stream()
+                .map(this::getDiscountOnProductPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal userDiscountAmount = totalBillNonPhone.multiply(userDiscountPercentage);
         totalDiscountApplied = totalDiscountApplied.add(userDiscountAmount);

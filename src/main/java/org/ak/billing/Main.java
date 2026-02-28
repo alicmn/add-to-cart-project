@@ -11,6 +11,8 @@ import org.ak.billing.services.StoreDBService;
 import org.ak.billing.services.impls.MyCartService;
 import org.ak.billing.services.impls.MyInvoiceService;
 import org.ak.billing.services.impls.MyStoreDBService;
+import org.ak.billing.commands.AddToCartCommand;
+import org.ak.billing.commands.CommandInvoker;
 import org.ak.billing.strategies.impls.MyCartLoadingStrategy;
 import org.ak.billing.strategies.impls.MyInvoiceGenerator;
 import org.ak.billing.strategies.impls.Store;
@@ -82,6 +84,8 @@ public class Main {
             Set<Product> inventory = myStoreDBService.getInventory();
             List<Product> productList = new ArrayList<>(inventory);
 
+            CommandInvoker cartInvoker = new CommandInvoker();
+
             while (true) {
                 System.out.println("\n------------- URUN LISTEMIZ -------------");
                 for (int i = 0; i < productList.size(); i++) {
@@ -90,6 +94,7 @@ public class Main {
                             + p.getUnitPrice() + " | Stok: " + p.getQuantity());
                 }
                 System.out.println("0. Alisverisi Tamamla (Kasaya Git)");
+                System.out.println("-1. Son Islemi GERI AL (Undo)");
 
                 System.out.print("\nSepete eklemek istediginiz urun numarasini secin: ");
                 int prodChoice;
@@ -102,6 +107,10 @@ public class Main {
 
                 if (prodChoice == 0) {
                     break;
+                }
+                if (prodChoice == -1) {
+                    cartInvoker.undoLastCommand();
+                    continue;
                 }
 
                 if (prodChoice < 1 || prodChoice > productList.size()) {
@@ -134,9 +143,10 @@ public class Main {
                 try {
                     Product cloneForCart = (Product) selectedProduct.clone();
                     cloneForCart.setQuantity(quantity);
-                    myCartService.addProduct(cloneForCart, cart);
-                    System.out.println(
-                            "==> [" + selectedProduct.getName() + "] sepetinize " + quantity + " adet eklendi!");
+
+                    AddToCartCommand addCommand = new AddToCartCommand(myCartService, cloneForCart, cart);
+                    cartInvoker.executeCommand(addCommand);
+
                 } catch (CloneNotSupportedException e) {
                     System.out.println("Klonlama hatasi.");
                 }
