@@ -10,6 +10,8 @@ import org.ak.billing.constants.ProductTypes;
 import org.ak.billing.constants.UserTypes;
 import org.ak.billing.strategies.InvoicingStrategy;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
@@ -18,51 +20,62 @@ public class MyInvoiceGenerator implements InvoicingStrategy {
     @Override
     public void generate(Shopper shopper) {
         UserDetails userDetails = shopper.getUserDetails();
-        double userDiscountPercentage = getUserDiscount(userDetails.getUserType(), userDetails.getUserSince());
-        double totalDiscountApplied = 0.0d;
-        double totalBillPhone = 0.0d;
-        double totalBillNonPhone = 0.0d;
+        BigDecimal userDiscountPercentage = getUserDiscount(userDetails.getUserType(), userDetails.getUserSince());
+        BigDecimal totalDiscountApplied = BigDecimal.ZERO;
+        BigDecimal totalBillPhone = BigDecimal.ZERO;
+        BigDecimal totalBillNonPhone = BigDecimal.ZERO;
 
         for (Product p : shopper.getShoppingCart().getProductsInCart().getProducts().values()) {
-            double discountedPrice = getDiscountedProductPrice(p);
+            BigDecimal discountedPrice = getDiscountedProductPrice(p);
             if (p.getType().equals(ProductTypes.PHONE)) {
-                totalBillPhone += discountedPrice;
+                totalBillPhone = totalBillPhone.add(discountedPrice);
             } else {
-                totalBillNonPhone += discountedPrice;
+                totalBillNonPhone = totalBillNonPhone.add(discountedPrice);
             }
-            totalDiscountApplied += getDiscountOnProductPrice(p);
+            totalDiscountApplied = totalDiscountApplied.add(getDiscountOnProductPrice(p));
         }
 
-        double userDiscountAmount = totalBillNonPhone * userDiscountPercentage;
-        totalDiscountApplied += userDiscountAmount;
-        totalBillNonPhone -= userDiscountAmount;
+        BigDecimal userDiscountAmount = totalBillNonPhone.multiply(userDiscountPercentage);
+        totalDiscountApplied = totalDiscountApplied.add(userDiscountAmount);
+        totalBillNonPhone = totalBillNonPhone.subtract(userDiscountAmount);
 
-        double totalBill = totalBillPhone + totalBillNonPhone;
+        BigDecimal totalBill = totalBillPhone.add(totalBillNonPhone);
 
         // Apply extra discount for every threshold amount on the bill
-        double threshold = (double) ApplicationConstants.EXTRA_DISCOUNT_THRESHOLD.getApplicationConstant();
-        double extraDiscountAmount = (double) ApplicationConstants.EXTRA_DISCOUNT_AMOUNT.getApplicationConstant();
+        BigDecimal threshold = (BigDecimal) ApplicationConstants.EXTRA_DISCOUNT_THRESHOLD.getApplicationConstant();
+        BigDecimal extraDiscountAmount = (BigDecimal) ApplicationConstants.EXTRA_DISCOUNT_AMOUNT
+                .getApplicationConstant();
 
-        int extraDiscountSets = (int) (totalBill / threshold);
-        double extraDiscount = extraDiscountSets * extraDiscountAmount;
+        BigDecimal[] divisionResult = totalBill.divideAndRemainder(threshold);
+        int extraDiscountSets = divisionResult[0].intValue();
+        BigDecimal extraDiscount = extraDiscountAmount.multiply(new BigDecimal(extraDiscountSets));
 
-        totalDiscountApplied += extraDiscount;
-        totalBill -= extraDiscount;
+        totalDiscountApplied = totalDiscountApplied.add(extraDiscount);
+        totalBill = totalBill.subtract(extraDiscount);
+
+        // Scale to 4 decimal places for consistency
+        totalBill = totalBill.setScale(4, RoundingMode.HALF_UP);
+        totalDiscountApplied = totalDiscountApplied.setScale(4, RoundingMode.HALF_UP);
 
         shopper.setInvoice(new Invoice(UUID.randomUUID(), LocalDateTime.now(), totalBill, totalDiscountApplied));
     }
 
-    private double getDiscountedProductPrice(Product product) {
-        return product.getQuantity() * product.getUnitPrice() - getDiscountOnProductPrice(product);
+    private BigDecimal getDiscountedProductPrice(Product product) {
+        BigDecimal quantity = new BigDecimal(product.getQuantity());
+        BigDecimal basePrice = product.getUnitPrice().multiply(quantity);
+        return basePrice.subtract(getDiscountOnProductPrice(product));
     }
 
-    private double getDiscountOnProductPrice(Product product) {
-        return product.getQuantity() * product.getUnitPrice() *
-                ((product.getType().equals(ProductTypes.PHONE)) ? 0 : InvoiceDiscounts.NOT_PHONE.getDiscount());
+    private BigDecimal getDiscountOnProductPrice(Product product) {
+        BigDecimal quantity = new BigDecimal(product.getQuantity());
+        BigDecimal basePrice = product.getUnitPrice().multiply(quantity);
+        BigDecimal discountRate = product.getType().equals(ProductTypes.PHONE) ? BigDecimal.ZERO
+                : InvoiceDiscounts.NOT_PHONE.getDiscount();
+        return basePrice.multiply(discountRate);
     }
 
-    private double getUserDiscount(UserTypes userType, LocalDateTime userSince) {
-        double userDiscountPercentage = 0.0d;
+    private BigDecimal getUserDiscount(UserTypes userType, LocalDateTime userSince) {
+        BigDecimal userDiscountPercentage = BigDecimal.ZERO;
         switch (userType) {
             case AFFILIATE:
                 userDiscountPercentage = InvoiceDiscounts.AFFILIATE.getDiscount();

@@ -2,6 +2,8 @@ package org.ak.billing.beans;
 
 import org.ak.billing.constants.ProductTypes;
 
+import java.math.BigDecimal;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -10,7 +12,7 @@ public final class Product implements Cloneable {
     private final String name;
     private int quantity;
     private final ProductTypes type;
-    private final double unitPrice;
+    private final BigDecimal unitPrice;
 
     @Override
     public int hashCode() {
@@ -32,7 +34,7 @@ public final class Product implements Cloneable {
         return super.clone();
     }
 
-    public Product(UUID id, String name, int quantity, ProductTypes type, double unitPrice) {
+    public Product(UUID id, String name, int quantity, ProductTypes type, BigDecimal unitPrice) {
         this.id = id;
         this.name = name;
         this.quantity = quantity;
@@ -56,7 +58,7 @@ public final class Product implements Cloneable {
         return type;
     }
 
-    public double getUnitPrice() {
+    public BigDecimal getUnitPrice() {
         return unitPrice;
     }
 

@@ -15,6 +15,7 @@ import org.ak.billing.strategies.impls.MyCartLoadingStrategy;
 import org.ak.billing.strategies.impls.MyInvoiceGenerator;
 import org.ak.billing.strategies.impls.Store;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -150,7 +151,7 @@ public class Main {
             myInvoiceService.generate(shopper);
             myInvoiceService.print(shopper);
 
-            double totalBill = shopper.getInvoice().getAmount();
+            BigDecimal totalBill = shopper.getInvoice().getAmount();
             DecimalFormat df = new DecimalFormat("#.##");
             System.out.println("\n==================================");
             System.out.println("NET ODENECEK TUTAR: $" + df.format(totalBill));

@@ -1,5 +1,7 @@
 package org.ak.billing.beans;
 
+import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -7,21 +9,21 @@ import java.util.UUID;
 public final class Invoice {
     private final UUID uid;
     private final LocalDateTime date;
-    private final double amount;
-    private final double discount;
+    private final BigDecimal amount;
+    private final BigDecimal discount;
 
-    public Invoice(UUID uid, LocalDateTime date, double amount, double discount) {
+    public Invoice(UUID uid, LocalDateTime date, BigDecimal amount, BigDecimal discount) {
         this.uid = uid;
         this.date = date;
         this.amount = amount;
         this.discount = discount;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public double getDiscount() {
+    public BigDecimal getDiscount() {
         return discount;
     }
 

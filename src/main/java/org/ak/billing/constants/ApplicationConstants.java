@@ -12,8 +12,8 @@ public enum ApplicationConstants {
     BILL_LENGTH(122),
     BILL_PADDING("*"),
     BILL_SPACE(" "),
-    EXTRA_DISCOUNT_THRESHOLD(200.0),
-    EXTRA_DISCOUNT_AMOUNT(5.0);
+    EXTRA_DISCOUNT_THRESHOLD(new java.math.BigDecimal("200.00")),
+    EXTRA_DISCOUNT_AMOUNT(new java.math.BigDecimal("5.00"));
 
     private final Object appCons;
 

@@ -1,19 +1,21 @@
 package org.ak.billing.constants;
 
+import java.math.BigDecimal;
+
 public enum InvoiceDiscounts {
-    NOT_PHONE(0.025),
-    CUSTOMER(0.05),
-    AFFILIATE(0.1),
-    GOLD_CART(0.3),
-    SILVER_CART(0.2);
+    NOT_PHONE(new BigDecimal("0.025")),
+    CUSTOMER(new BigDecimal("0.05")),
+    AFFILIATE(new BigDecimal("0.10")),
+    GOLD_CART(new BigDecimal("0.30")),
+    SILVER_CART(new BigDecimal("0.20"));
 
-    private final double discount;
+    private final BigDecimal discount;
 
-    InvoiceDiscounts(double discount) {
+    InvoiceDiscounts(BigDecimal discount) {
         this.discount = discount;
     }
 
-    public double getDiscount() {
+    public BigDecimal getDiscount() {
         return discount;
     }
 }
