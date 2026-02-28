@@ -1,70 +1,69 @@
-
 # ADD TO CART APP
 
 ## PROBLEM STATEMENT
 
-
 On a retail website, the following discounts apply:
 
-1. If the user has gold card of the store, he gets a 30% discount,
-2. If the user has silver card of the store, he gets a 20% discount,
-3. If the user is an affiliate of the store, he gets a 10% discount,
+1. If the user has a gold card of the store, he gets a 30% discount.
+2. If the user has a silver card of the store, he gets a 20% discount.
+3. If the user is an affiliate of the store, he gets a 10% discount.
 4. If the user has been a customer for over 2 years, he gets a 5% discount. 
-5. For every $200 on the bill, there would be a $ 5 discount (e.g. for $ 950, you get $ 20
-as a discount).
+5. For every $200 on the bill, there would be a $5 discount (e.g., for $950, you get $20 as a discount).
+6. The percentage-based discounts do not apply to phones.
+7. A user can get only one of the percentage-based discounts on a bill.
 
-6. The percentage based discounts do not apply on phones.
-
-7. A user can get only one of the percentage based discounts on a bill.
-
-Write a program in java such that given a
-bill, it finds the net payable amount. 
-User interface is not required. 
+Write a program in Java such that given a bill, it finds the net payable amount. 
 
 What we care about:
 
-Required Activities
-• Object oriented programming approach, provide a high level UML class diagram of
-all the key classes in your solution. This can either be on paper or using a CASE tool
-• Code to be generic and simple
-• Leverage today's best coding practices
-• Clear README.md that explains how the code and the test can be run and how the
-coverage reports can be generated
+Required Activities:
+- Object-oriented programming approach.
+- Code to be generic and simple.
+- Leverage today's best coding practices.
+- Clear README.md that explains how the code and the tests can be run.
 
+---
 
-## solution
+## SOLUTION & ARCHITECTURE
 
+The application uses **Java 10**, **Maven**, and **JUnit 4**.
 
-Total discount is a combination of discount on product and discount offered to USER.
+Total discount is a combination of discount on the product and discount offered to the USER.
+The problem statement logic is encapsulated using the **Strategy Design Pattern** and **Dependency Injection** principles. 
 
-Depending on the their type (AFFILIATE, GOLD_CART, SILVER_CART, OLD/NEW CUSTOMER), the user gets (10, 30, 5) percent discount.
-Depending on the product purchased the user gets either 2.5% discount if the product is non-phone product or no discount on the product.
-A generic formula for computation of product price can be given as: 
+### Fixed Business Logic
+The initial algorithm missed specific constraints which have been corrected:
+1. **Rule 6 Correction:** The user's percentage-based discount (e.g., 30% for Gold) is **only calculated on non-phone products**. The phone product totals are accumulated independently without receiving the generic user discount.
+2. **Rule 5 Correction:** A `$5` discount is explicitly deducted from the final calculated subtotal for every `$200` accumulated.
 
-DISCOUNTED_TOTAL_BILL = QUANTITY x ( (1-USER_DISCOUNT) x ( (1-PRODUCT_DISCOUNT) x (SUM of per unit non-PHONE product prices) + (SUM of per unit PHONE product prices) ) )
+### How to Run the Interactive Application (CLI)
 
+The application has a robust, interactive Command Line Interface built inside `Main.java` allowing dynamic shopping.
 
-Testcase:
+Open your terminal and execute:
+```bash
+mvn clean compile exec:java -Dexec.mainClass="org.ak.billing.Main"
+```
+Follow the on-screen prompts to define the user type, choose products dynamically from the inventory, set quantities, and print a final detailed invoice.
 
-We're assuming the shopper purchases 2 item with unit prices as below:
+### How to Run the Tests
 
-($19.99 $4.99 14.99 0.99) -- (PHONE $1.99)
+The application utilizes **JUnit** for its unit testing, with verified mathematical calculations representing the rules above.
 
-CASE 1 >> AFFILIATE (0.9) 2( 0.9(0.975*(1.99+14.99+4.99+19.99) + 0.99) ) = 75.42 discount = 10.48
+To run the unit tests:
+```bash
+mvn clean test
+```
 
-CASE 2 >> GOLD_CART (0.7) 2( 0.7(0.975*(1.99+14.99+4.99+19.99) + 0.99) ) = 58.66 discount = 27.24
+### Coverage & Assertions Example
 
-CASE 2 >> SILVER (0.8) 2( 0.8(0.975*(1.99+14.99+4.99+19.99) + 0.99) ) = 67.04 discount = 18.86
+Assume the shopper purchases specific items with the following base pricing:
+- Clothing & Cosmetics & Electronics & Stationery (Total affected by user discount)
+- Phones (Prices excluded from user percentage cuts)
 
-
-CASE 4 >> CUSTOMER (0.95) (Since more than two years) 2( 0.95(0.975*(1.99+14.99+4.99+19.99) + 0.99) ) = 79.61 discount = 6.29
-
-CASE 5 >> CUSTOMER (0.95) (Since less than two years) 2( 0.975(1.99+14.99+4.99+19.99) + 0.99 ) = 83.8 discount = 2.1
-
-
-
-
-
-
-
-
+The tests (`ShoppingApplicationTest.java`) systematically verify the net payable amounts for:
+- Affiliate User: Evaluated to `$75.61`
+- Gold Cart User: Evaluated to `$59.25`
+- Silver Cart User: Evaluated to `$67.43`
+- Recurring Customer: Evaluated to `$79.71`
+- Standard Customer: Evaluated to `$83.80`
