@@ -44,6 +44,39 @@ Open your terminal and execute:
 ```bash
 mvn clean compile exec:java -Dexec.mainClass="org.ak.billing.Main"
 ```
+
+**Example Terminal Output:**
+```text
+E-Ticaret Sistemimize Hosgeldiniz!
+Lutfen Musteri Tipinizi Secin:
+1 - Sirket Calisani (AFFILIATE)
+2 - Gold Uye (GOLD_CART)
+3 - Silver Uye (SILVER_CART)
+4 - Eski Musteri (>2 Yil Uye)
+5 - Yeni Musteri (Standart/Ziyaretci)
+Seciminiz: 2
+
+------------- URUN LISTEMIZ -------------
+1. BLUE MEN JACKET | Tip: CLOTHING | Fiyat: $19.99 | Stok: 20
+2. ELIDOR SHAMPOO | Tip: COSMETICS | Fiyat: $4.99 | Stok: 62
+3. MAC AIR PRO | Tip: ELECTRONICS | Fiyat: $14.99 | Stok: 120
+4. SAMSUNG S3 MINI | Tip: PHONE | Fiyat: $0.99 | Stok: 20
+5. CARTDORE Black Royal  | Tip: STATIONERY | Fiyat: $1.99 | Stok: 45
+0. Alisverisi Tamamla (Kasaya Git)
+
+Sepete eklemek istediginiz urun numarasini secin: 4
+Kac adet SAMSUNG S3 MINI eklemek istiyorsunuz?: 1
+==> [SAMSUNG S3 MINI] sepetinize 1 adet eklendi!
+
+Sepete eklemek istediginiz urun numarasini secin: 0
+
+Kasaya yonlendiriliyorsunuz...
+...
+==================================
+NET ODENECEK TUTAR: $...
+Bizi tercih ettiginiz icin tesekkurler!
+==================================
+```
 Follow the on-screen prompts to define the user type, choose products dynamically from the inventory, set quantities, and print a final detailed invoice.
 
 ### How to Run the Tests
