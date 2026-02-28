@@ -4,13 +4,18 @@ import org.ak.billing.beans.Product;
 import org.ak.billing.daos.StoreDao;
 import org.ak.billing.services.StoreDBService;
 
+import org.ak.billing.observers.InventoryObserver;
+
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public class MyStoreDBService implements StoreDBService {
 
     StoreDao storeDao;
+    private final List<InventoryObserver> observers = new ArrayList<>();
 
     public MyStoreDBService(StoreDao storeDao) {
         this.storeDao = storeDao;
@@ -43,6 +48,27 @@ public class MyStoreDBService implements StoreDBService {
         }
         if (!inventoryToUpdate.isEmpty()) {
             storeDao.updateInventoryBatch(inventoryToUpdate);
+            for (Product updatedProduct : inventoryToUpdate) {
+                notifyObservers(updatedProduct);
+            }
+        }
+    }
+
+    @Override
+    public void addObserver(InventoryObserver observer) {
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+
+    @Override
+    public void removeObserver(InventoryObserver observer) {
+        observers.remove(observer);
+    }
+
+    private void notifyObservers(Product product) {
+        for (InventoryObserver observer : observers) {
+            observer.onProductStockChanged(product);
         }
     }
 }

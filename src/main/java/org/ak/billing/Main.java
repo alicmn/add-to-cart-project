@@ -29,6 +29,10 @@ public class Main {
         try {
             // Servislerin başlatılması (Dependency Injection kurulumu)
             StoreDBService myStoreDBService = new MyStoreDBService(new MyStoreDao(Store.getStore()));
+
+            // Observer baglantisi (Kritik Stok Uyarisi icin)
+            myStoreDBService.addObserver(new org.ak.billing.observers.LowStockAlertObserver());
+
             MyCartService myCartService = new MyCartService(myStoreDBService, new MyCartLoadingStrategy());
             InvoiceService myInvoiceService = new MyInvoiceService(new MyInvoiceGenerator());
 

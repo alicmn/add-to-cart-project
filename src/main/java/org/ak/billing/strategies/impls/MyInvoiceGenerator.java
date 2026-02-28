@@ -7,20 +7,23 @@ import org.ak.billing.beans.UserDetails;
 import org.ak.billing.constants.ApplicationConstants;
 import org.ak.billing.constants.InvoiceDiscounts;
 import org.ak.billing.constants.ProductTypes;
-import org.ak.billing.constants.UserTypes;
 import org.ak.billing.strategies.InvoicingStrategy;
+import org.ak.billing.strategies.discount.UserDiscountFactory;
+import org.ak.billing.strategies.discount.UserDiscountStrategy;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 public class MyInvoiceGenerator implements InvoicingStrategy {
     @Override
     public void generate(Shopper shopper) {
         UserDetails userDetails = shopper.getUserDetails();
-        BigDecimal userDiscountPercentage = getUserDiscount(userDetails.getUserType(), userDetails.getUserSince());
+
+        UserDiscountStrategy discountStrategy = UserDiscountFactory.getStrategy(userDetails.getUserType());
+        BigDecimal userDiscountPercentage = discountStrategy.calculateDiscount(userDetails.getUserSince());
+
         BigDecimal totalDiscountApplied = BigDecimal.ZERO;
         BigDecimal totalBillPhone = BigDecimal.ZERO;
         BigDecimal totalBillNonPhone = BigDecimal.ZERO;
@@ -72,26 +75,5 @@ public class MyInvoiceGenerator implements InvoicingStrategy {
         BigDecimal discountRate = product.getType().equals(ProductTypes.PHONE) ? BigDecimal.ZERO
                 : InvoiceDiscounts.NOT_PHONE.getDiscount();
         return basePrice.multiply(discountRate);
-    }
-
-    private BigDecimal getUserDiscount(UserTypes userType, LocalDateTime userSince) {
-        BigDecimal userDiscountPercentage = BigDecimal.ZERO;
-        switch (userType) {
-            case AFFILIATE:
-                userDiscountPercentage = InvoiceDiscounts.AFFILIATE.getDiscount();
-                break;
-            case CUSTOMER:
-                if (ChronoUnit.YEARS.between(userSince, LocalDateTime.now()) > 2) {
-                    userDiscountPercentage = InvoiceDiscounts.CUSTOMER.getDiscount();
-                }
-                break;
-            case GOLD_CART:
-                userDiscountPercentage = InvoiceDiscounts.GOLD_CART.getDiscount();
-                break;
-            case SILVER_CART:
-                userDiscountPercentage = InvoiceDiscounts.SILVER_CART.getDiscount();
-                break;
-        }
-        return userDiscountPercentage;
     }
 }
