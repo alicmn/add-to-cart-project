@@ -8,14 +8,24 @@ import org.ak.billing.strategies.InvoicingStrategy;
 
 public class MyInvoiceService implements InvoiceService {
     private final InvoicingStrategy invoicingStrategy;
+    private final java.util.List<org.ak.billing.observers.InvoiceObserver> observers = new java.util.ArrayList<>();
 
     public MyInvoiceService(InvoicingStrategy invoicingStrategy) {
         this.invoicingStrategy = invoicingStrategy;
     }
 
     @Override
+    public void addObserver(org.ak.billing.observers.InvoiceObserver observer) {
+        observers.add(observer);
+    }
+
+    @Override
     public void generate(Shopper shopper) {
         invoicingStrategy.generate(shopper);
+        // Faturasi uretildiginde tum dinleyenleri/aboneleri (observers) uyar
+        for (org.ak.billing.observers.InvoiceObserver observer : observers) {
+            observer.onInvoiceGenerated(shopper);
+        }
     }
 
     @Override

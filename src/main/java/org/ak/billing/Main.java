@@ -5,7 +5,6 @@ import org.ak.billing.beans.Shopper;
 import org.ak.billing.beans.ShoppingCart;
 import org.ak.billing.beans.UserDetails;
 import org.ak.billing.constants.UserTypes;
-import org.ak.billing.daos.impls.MyStoreDao;
 import org.ak.billing.services.InvoiceService;
 import org.ak.billing.services.StoreDBService;
 import org.ak.billing.services.impls.MyCartService;
@@ -15,7 +14,13 @@ import org.ak.billing.commands.AddToCartCommand;
 import org.ak.billing.commands.CommandInvoker;
 import org.ak.billing.strategies.impls.MyCartLoadingStrategy;
 import org.ak.billing.strategies.impls.MyInvoiceGenerator;
-import org.ak.billing.strategies.impls.Store;
+
+import org.ak.billing.commands.RemoveFromCartCommand;
+import org.ak.billing.observers.EmailNotificationObserver;
+import org.ak.billing.observers.SmsNotificationObserver;
+import org.ak.billing.strategies.PaymentStrategy;
+import org.ak.billing.strategies.impls.CashOnDeliveryPaymentStrategy;
+import org.ak.billing.strategies.impls.CreditCardPaymentStrategy;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -30,13 +35,16 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         try {
             // Servislerin başlatılması (Dependency Injection kurulumu)
-            StoreDBService myStoreDBService = new MyStoreDBService(new MyStoreDao(Store.getStore()));
+            StoreDBService myStoreDBService = new MyStoreDBService(
+                    new org.ak.billing.daos.impls.FileStoreDao("database.csv"));
 
             // Observer baglantisi (Kritik Stok Uyarisi icin)
             myStoreDBService.addObserver(new org.ak.billing.observers.LowStockAlertObserver());
 
             MyCartService myCartService = new MyCartService(myStoreDBService, new MyCartLoadingStrategy());
             InvoiceService myInvoiceService = new MyInvoiceService(new MyInvoiceGenerator());
+            myInvoiceService.addObserver(new EmailNotificationObserver());
+            myInvoiceService.addObserver(new SmsNotificationObserver());
 
             System.out.println("E-Ticaret Sistemimize Hosgeldiniz!");
             System.out.println("Lutfen Musteri Tipinizi Secin:");
@@ -95,6 +103,7 @@ public class Main {
                 }
                 System.out.println("0. Alisverisi Tamamla (Kasaya Git)");
                 System.out.println("-1. Son Islemi GERI AL (Undo)");
+                System.out.println("-2. Sepetten Urun Cikar (Remove Command)");
 
                 System.out.print("\nSepete eklemek istediginiz urun numarasini secin: ");
                 int prodChoice;
@@ -110,6 +119,19 @@ public class Main {
                 }
                 if (prodChoice == -1) {
                     cartInvoker.undoLastCommand();
+                    continue;
+                }
+                if (prodChoice == -2) {
+                    System.out.print("Cikarmak istediginiz urun ismini tam girin (Case Sensitive): ");
+                    String name = scanner.nextLine();
+                    Product toRemove = cart.getProductsInCart().getProducts().values().stream()
+                            .filter(p -> p.getName().equals(name)).findFirst().orElse(null);
+                    if (toRemove != null) {
+                        RemoveFromCartCommand removeCmd = new RemoveFromCartCommand(myCartService, toRemove, cart);
+                        cartInvoker.executeCommand(removeCmd);
+                    } else {
+                        System.out.println("Sepetinizde " + name + " isminde urun bulunamadi!");
+                    }
                     continue;
                 }
 
@@ -169,6 +191,17 @@ public class Main {
             DecimalFormat df = new DecimalFormat("#.##");
             System.out.println("\n==================================");
             System.out.println("NET ODENECEK TUTAR: $" + df.format(totalBill));
+
+            System.out.println("Odeme Yontemi Secin: (1) Kredi Karti (2) Kapida Odeme");
+            String payChoice = scanner.nextLine();
+            PaymentStrategy paymentStrategy;
+            if (payChoice.equals("1")) {
+                paymentStrategy = new CreditCardPaymentStrategy("1234-5678-9012-3456");
+            } else {
+                paymentStrategy = new CashOnDeliveryPaymentStrategy();
+            }
+            paymentStrategy.pay(totalBill);
+
             System.out.println("Bizi tercih ettiginiz icin tesekkurler!");
             System.out.println("==================================");
 
