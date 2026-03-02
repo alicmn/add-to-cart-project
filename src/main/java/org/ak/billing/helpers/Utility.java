@@ -25,10 +25,10 @@ public class Utility {
                 return localDateTime.format(dateTimeFormatter);
         }
 
-        public static String getCSVFromList(List list) {
+        public static String getCSVFromList(List<String> list) {
                 String csv = "";
                 if (list != null && !list.isEmpty()) {
-                        for (Object object : list) {
+                        for (String object : list) {
                                 csv += object.toString() + ", ";
                         }
                         csv = csv.substring(0, csv.lastIndexOf(", "));

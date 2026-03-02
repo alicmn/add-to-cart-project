@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
@@ -41,13 +40,11 @@ public class ShoppingApplicationTest {
         @InjectMocks
         private ShoppingApplication shoppingApplication;
 
-        private DecimalFormat df;
         private MyInvoiceGenerator invoiceGenerator;
 
         @Before
         public void setUp() throws Exception {
                 MockitoAnnotations.openMocks(this);
-                df = new DecimalFormat("#.####");
                 invoiceGenerator = new MyInvoiceGenerator();
         }
 
